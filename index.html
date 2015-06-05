@@ -85,7 +85,8 @@ Add the development schedule with when the commit fests are. See magnus's slides
                         </small></p>
                     </section>
                     <section id="cmdline">
-                        <iframe src="https://localhost:4200" height="600" width="1200"></iframe>
+                        <!-- Uncomment this iframe to activate shellinabox connection -->
+                        <!-- <iframe src="https://localhost:4200" height="600" width="1200"></iframe> -->
                     </section>
                 </section>
                 
@@ -124,31 +125,75 @@ Add the development schedule with when the commit fests are. See magnus's slides
                 </section>
 
                 <section data-background="css/theme/omniti_bg_logo.png">
-                    <h2>Row level security</h2>
-                        BYPASSRLS
-                        Row level security shows up in the \d results
+                    <h2>Row Level Security (RLS)</h2>
+                    <ul>
+                        <li>Per-row access policies</li>
+                        <li>In addition to existing schema, table, column privileges</li>
+                        <li>Superusers and object owners bypass RLS. Unless...</li>
+                        <li>New GUC - row_security (ON, OFF, FORCE)</li>
+                        <li>pg_dump sets row_securty to OFF (--enable-row-security)</li>
+                        <li>Multiple policies per table (Results are OR'ed)</li>
+                        <li>BYPASSRLS - new role property to allow individual roles to bypass RLS</li>
+                        <li>Row level security shows up in the \d results</li>
                 </section>
 
                 <section data-background="css/theme/omniti_bg_logo.png">
                     <h2>Checkpoint segments gone!</h2>
-                    http://www.depesz.com/2015/02/25/waiting-for-9-5-replace-checkpoint_segments-with-min_wal_size-and-max_wal_size/
-                    checkpoint_segments gone. min_wal_size & max_wal_size
-                    if you set them the same, it gives you the same behavior as before
+                    <ul>
+                        <li>checkpoint_segments replaced by min_wal_size &amp; max_wal_size</li>
+                        <ul>
+                            <li>min_wal_size = 80MB (default)</li>
+                            <li>max_wal_size = 128MB (default)</li>
+                        </ul>
+                        <li>Moving average of WAL segments (pg_xlogs) based on current activity</li>
+                        <li>Checkpoints are auto-tuned to happen in between this size of WAL segments existing</li>
+                        <li>Will only use up to max_wal_size if actually needed</li>
+                        <li>If you set them the same, it gives you the same behavior as before</li>
                 </section>
 
                 <section data-background="css/theme/omniti_bg_logo.png">
                     <h2>pg_rewind</h2>
-                    http://hlinnaka.iki.fi/2015/03/23/pg_rewind-in-postgresql-9-5/
+                    <ul>
+                        <li>Old failover steps</li>
+                        <ol>
+                            <li>Stop master (if it's still around)</li>
+                            <li>Touch recovery trigger file on slave to make master</li>
+                            <li>Rebuild old master from scratch as new slave</li>
+                                <ul>
+                                    <li>Rsync helped, but still not ideal for huge databases</li>
+                                </ul>
+                        </ol>
+                    </ul>
+                </section>
+                <section data-background="css/theme/omniti_bg_logo.png">
+                    <h2>pg_rewind</h2>
+                    <ul>
+                        <li>New failover steps!</li>
+                        <ol>
+                            <li>Stop master (if it's still around)</li>
+                            <li>Touch recovery trigger file on slave to make master</li>
+                            <li>pg_rewind on old master to resync with new master and become new slave</li>
+                            <li>Connect new slave to new master</li>
+                            <li>Do a little dance...</li>
+                        </ol>
+                        <li>Understands postgres file properties &amp; format so knows better than rsync how to reset old master.</li>
+                        <li>Requires data checksum turned on (cluster init only) or wal_log_hints = on (requires restart)</li>
+                    </ul>
                 </section>
 
                 <section data-background="css/theme/omniti_bg_logo.png">
                     <h2>Foreign Table Inheritance</h2>
-                    http://michael.otacoo.com/postgresql-2/postgres-9-5-feature-foreign-table-inheritance/
+                    <ul>
+                        <li>Foreign tables can how be inheritance children or parents</li>
+                        <li>More options for partitioning &amp; sharding</li>
+                    </ul>
                 </section>
 
                 <section data-background="css/theme/omniti_bg_logo.png">
                     <h2>Import Foreign Schema</h2>
-                    Run it live and see if it errors when you run it twice
+                    <ul>
+                        <li>Create all tables in a defined FDW's schema as local foreign tables</li>
+                    </ul>
                 </section>
 
                 <section data-background="css/theme/omniti_bg_logo.png">
@@ -271,8 +316,10 @@ Add the development schedule with when the commit fests are. See magnus's slides
                 <section data-background="css/theme/omniti_bg_logo.png">
                     <h1>Thanks to</h1>
                     <ul>
-                        <li>Hubert "Depesz" Lubaczewski - http://www.depesz.com - "Waiting For ..." series.</li>
                         <li>Magnus Hagander - For doing this talk in NYC before me already so I could steal it. </li>
+                        <li>Hubert "Depesz" Lubaczewski - http://www.depesz.com - "Waiting For 9.5 ..." series.</li>
+                        <li>Michael Paquier - http://michael.otacoo.com/ - "9.5 feature highlight ..." series
+                        <li>Reveal.js - https://github.com/hakimel/reveal.js - For the awesome software this presentation was created in</li>
                     </ul>
 
                 </section>

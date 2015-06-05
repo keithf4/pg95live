@@ -1,0 +1,12 @@
+\set ECHO ALL
+
+DROP USER MAPPING IF EXISTS FOR PUBLIC SERVER myfdw;
+DROP SERVER IF EXISTS myfdw CASCADE;
+DROP EXTENSION IF EXISTS postgres_fdw;
+
+CREATE EXTENSION postgres_fdw;
+
+CREATE SERVER myfdw FOREIGN DATA WRAPPER postgres_fdw
+    OPTIONS (host 'localhost', dbname 'foreign_db');
+
+CREATE USER MAPPING FOR PUBLIC SERVER myfdw OPTIONS (password '');

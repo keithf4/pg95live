@@ -1,0 +1,11 @@
+\set ECHO ALL
+
+--DROP FOREIGN TABLE IF EXISTS log_entry_y2014;
+--DROP FOREIGN TABLE IF EXISTS log_entry_y2015;
+DROP SCHEMA IF EXISTS fdw_schema CASCADE;
+
+CREATE SCHEMA fdw_schema;
+
+IMPORT FOREIGN SCHEMA public FROM SERVER myfdw INTO fdw_schema;
+
+\dE *.*
