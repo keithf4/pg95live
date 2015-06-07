@@ -135,6 +135,7 @@ Add the development schedule with when the commit fests are. See magnus's slides
                         <li>Multiple policies per table (Results are OR'ed)</li>
                         <li>BYPASSRLS - new role property to allow individual roles to bypass RLS</li>
                         <li>Row level security shows up in the \d results</li>
+                        <li>"Row Level Security" by Stephen Frost tomorrow @ 4pm in DMS 1140</li> 
                 </section>
 
                 <section data-background="css/theme/omniti_bg_logo.png">
@@ -193,31 +194,51 @@ Add the development schedule with when the commit fests are. See magnus's slides
                     <h2>Import Foreign Schema</h2>
                     <ul>
                         <li>Create all tables in a defined FDW's schema as local foreign tables with a single command</li>
+                        <li>"Transacting with foreign servers - Two's company, three is ..." by Ashutosh Bapat tomorrow @ 2pm in DMS 1160</li>
                     </ul>
                 </section>
 
                 <section data-background="css/theme/omniti_bg_logo.png">
-                    <h2>Numeric generate_series()</h2>
-                    Numeric generate_series() (can now go higher than int; start higher)
-                    http://www.depesz.com/2014/11/23/waiting-for-9-5-add-generate_seriesnumeric-numeric/
-                </section>
-
-                <section data-background="css/theme/omniti_bg_logo.png">
-                    <h2>Multi-column Sub-Select UPDATE</h2>
-                </section>
-
-                <section data-background="css/theme/omniti_bg_logo.png">
                     <h2>Grouping Sets</h2>
-                    GROUPING SETS (CUBE & ROLLUP) read up on this more to understand better
+                    <ul>
+                        <li>Aggregate data by different GROUP BY clauses at once</li>
+                        <li>Previously achieved by conjoined UNION ALL statements</li>
+                        <li>ROLLUP &amp; CUBE</li>
+                        <li>Depesz does great job of explaining further<a href="http://www.depesz.com/2015/05/24/waiting-for-9-5-support-grouping-sets-cube-and-rollup/" target="_blank">on his blog</a></li>
+                    </ul>
                 </section>
 
                 <section data-background="css/theme/omniti_bg_logo.png">
-                    <h2>Arrays As Input To array_agg() and ARRAY()</h2>
-                    http://www.depesz.com/2014/11/25/waiting-for-9-5-support-arrays-as-input-to-array_agg-and-arrayselect/
+                    <h2>Multi-Column Sub-Select UPDATE</h2>
+                    <ul>
+                        <li>Update more than one column with subselect</li>
+                        <li>Standard SQL Syntax</li>
+                        <pre><code data-trim>
+UPDATE tab SET (col1, col2) =
+    (SELECT foo, bar FROM tab2)
+WHERE ...
+                        </pre></code>
+                    </ul>
                 </section>
 
                 <section data-background="css/theme/omniti_bg_logo.png">
                     <h2>SKIP LOCKED</h2>
+                </section>
+
+                <section data-background="css/theme/omniti_bg_logo.png">
+                    <h2>Numeric generate_series()</h2>
+                    <ul>
+                        <li>generate_series() could do int &amp; time already</li>
+                        <li>Can now start &amp; end higher than int</li>
+                    </ul>
+                </section>
+
+                <section data-background="css/theme/omniti_bg_logo.png">
+                    <h2>Arrays As Input To array_agg() and ARRAY()</h2>
+                    <ul>
+                        <li>Would previously throw errors when used on an array column</li>
+                        <li>Now creates multi-dimensional array output</li>
+                    </ul>
                 </section>
 
                 <section data-background="css/theme/omniti_bg_logo.png">
