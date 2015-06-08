@@ -106,7 +106,8 @@ Add the development schedule with when the commit fests are. See magnus's slides
                         </ul>
                     <h2>Me!</h2>
                     <ul>
-                        <li>Author of several third party PG Tools: pg_partman, pg_extractor, mimeo, pg_jobmon</li>
+                        <li>Author of several third party PG Tools:<br />
+                        <a href="https://github.com/keithf4/pg_partman" target="_blank">pg_partman</a>, <a href="https://github.com/omniti-labs/pg_extractor" target="_blank">pg_extractor</a>, <a href="https://github.com/omniti-labs/mimeo" target="_blank">mimeo</a>, <a href="https://github.com/omniti-labs/pg_jobmon" target="_blank">pg_jobmon</a></li>
                     </ul>
                 </section>
    
@@ -204,7 +205,7 @@ Add the development schedule with when the commit fests are. See magnus's slides
                         <li>Aggregate data by different GROUP BY clauses at once</li>
                         <li>Previously achieved by conjoined UNION ALL statements</li>
                         <li>ROLLUP &amp; CUBE</li>
-                        <li>Depesz does great job of explaining further<a href="http://www.depesz.com/2015/05/24/waiting-for-9-5-support-grouping-sets-cube-and-rollup/" target="_blank">on his blog</a></li>
+                        <li>Depesz does great job of explaining further <a href="http://www.depesz.com/2015/05/24/waiting-for-9-5-support-grouping-sets-cube-and-rollup/" target="_blank">on his blog</a></li>
                     </ul>
                 </section>
 
@@ -219,10 +220,6 @@ UPDATE tab SET (col1, col2) =
 WHERE ...
                         </pre></code>
                     </ul>
-                </section>
-
-                <section data-background="css/theme/omniti_bg_logo.png">
-                    <h2>SKIP LOCKED</h2>
                 </section>
 
                 <section data-background="css/theme/omniti_bg_logo.png">
@@ -242,38 +239,68 @@ WHERE ...
                 </section>
 
                 <section data-background="css/theme/omniti_bg_logo.png">
-                    <h2>Reduced Lock Levels</h2>
-                    http://www.depesz.com/2015/04/23/waiting-for-9-5-reduce-lock-levels-of-some-trigger-ddl-and-add-fks/
-- Reduce lock levels of some trigger DDL and add FKs.  Reduce lock
-  levels to ShareRowExclusive for the following SQL CREATE TRIGGER
-    (but not DROP or ALTER), ALTER TABLE ENABLE TRIGGER, ALTER TABLE
-      DISABLE TRIGGER, and ALTER TABLE … ADD CONSTRAINT FOREIGN KEY
-        Original work by Simon Riggs, extracted and refreshed by Andreas
-          Karlsson New test cases added by Andreas Karlsson Reviewed by Noah
-            Misch, Andres Freund, Michael Paquier and Simon Riggs
-              http://git.postgresql.org/pg/commitdiff/0ef0396ae1687bf738d4703773d55467c36b2bcd
-
-
+                    <h2>SKIP LOCKED</h2>
+                    <ul>
+                        <li>Skip locked rows when using SELECT ... NOWAIT
+                    </ul>
                 </section>
 
                 <section data-background="css/theme/omniti_bg_logo.png">
-                    <h2>Toggle UNLOGGED</h2>
-                    Beware turning off UNLOGGED on a large table
+                    <h2>Reduced Lock Levels</h2>
+                    <ul>
+                        <li>Reduced lock levels (to ShareRowExclusive) for</li>
+                        <ul>
+                            <li>CREATE TRIGGER (not DROP or ALTER)</li>
+                            <li>ALTER TABLE ENABLE TRIGGER</li>
+                            <li>ALTER TABLE DISABLE TRIGGER</li>
+                            <li>ALTER TABLE ... ADD CONSTRAINT FOREIGN KEY</li>
+                        </ul>
+                    </ul>
                 </section>
 
+                 <section data-background="css/theme/omniti_bg_logo.png">
+                    <h2>Sorting Speed Improvement</h2>
+                    <ul>
+                        <li>Sorting used by CREATE INDEX, CLUSTER &amp; query plans much faster for text and numeric data</li>
+                        <li>3x - 10x faster</li>
+                        <li>Abbreviated Keys</li>
+                    </ul>
+                </section>
+                
                 <section data-background="css/theme/omniti_bg_logo.png">
                     <h2>BRIN Indexes</h2>
-                    http://www.depesz.com/2014/11/22/waiting-for-9-5-brin-block-range-indexes/
+                    <ul>
+                        <li>Block Range Index / MinMax Index</li>
+                        <li>Stores only the bounds-per-heap-page vs BTree method of one index entry for each value</li>
+                        <li>Configure how many heap pages contribute to index entry</li>
+                        <li>Significantly faster index creation, update &amp; smaller size</li>
+                        <li>Sometimes slower index searches than BTree</li>
+                        <li>Works better with statically ordered data</li>
+                        <li>Really good explanation &amp; examples at <a href="http://pythonsweetness.tumblr.com/post/119568339102/block-range-brin-indexes-in-postgresql-9-5" target="_blank">python sweetness blog</a></li>
                 </section>
 
                 <section data-background="css/theme/omniti_bg_logo.png">
                     <h2>GiST Index-Only Scans</h2>
-                    box &amp; point only
+                    <ul>
+                        <li>Box &amp; Point data types only</li>
+                        <li>Big improvement for geometric databases (PostGIS)</li>
+                    </ul>
                 </section>
 
                 <section data-background="css/theme/omniti_bg_logo.png">
                     <h2>Reindex Schema</h2>
-                    http://www.depesz.com/2014/12/09/waiting-for-9-5-reindex-schema/
+                    <ul>
+                        <li>REINDEX SCHEMA ...</li>
+                        <li>Reindex all tables in a given schema</li>
+                    </ul>
+                </section>
+
+                <section data-background="css/theme/omniti_bg_logo.png">
+                    <h2>Toggle UNLOGGED</h2>
+                    <ul>
+                        <li>ALTER TABLE ... SET LOGGED / UNLOGGED</li>
+                        <li>Beware changing on large tables (requires table rewrite)</li>
+                    </ul>
                 </section>
 
                 <section data-background="css/theme/omniti_bg_logo.png">
