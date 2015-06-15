@@ -108,32 +108,125 @@
                     </ul>
                 </section>
    
-                <section data-background="css/theme/omniti_bg_logo.png">
-                    <h2>INSERT ... ON CONFLICT ... (UPSERT)</h2>
-                    <ul>
-                        <li>"... optimistic variant of regular insertion that first does a pre-check for existing tuples and then attempts an insert."</li>
-                        <li>Similar to MERGE (arguably better)</li>
-                        <li>ON CONFLICT...</li>
+                <section>
+                    <section data-background="css/theme/omniti_bg_logo.png">
+                        <h2>INSERT ... ON CONFLICT ... (UPSERT)</h2>
                         <ul>
-                            <li>ON CONSTRAINT ... (better to name columns)</li>
-                            <li>DO NOTHING</li>
-                            <li>DO UPDATE SET ... [WHERE ...]</li>
+                            <li>"... optimistic variant of regular insertion that first does a pre-check for existing tuples and then attempts an insert."</li>
+                            <li>Similar to MERGE (arguably better)</li>
+                            <li>ON CONFLICT...</li>
+                            <ul>
+                                <li>ON CONSTRAINT ... (better to name columns)</li>
+                                <li>DO NOTHING</li>
+                                <li>DO UPDATE SET ... [WHERE ...]</li>
+                            </ul>
                         </ul>
-                    </ul>
+                    </section>
+                    <section>
+                        <pre><code data-trim>
+CREATE TABLE IF NOT EXISTS upsert_table (                                                
+    id serial primary key,                                                               
+    some_key text not null unique,                                                       
+    some_val int not null default 0                                                      
+);                                                                                       
+CREATE TABLE                                                                             
+INSERT INTO upsert_table (some_key) VALUES ('a'), ('b');                                 
+INSERT 0 2                                                                               
+SELECT * FROM upsert_table;                                                              
+ id | some_key | some_val                                                                
+----+----------+----------                                                               
+  1 | a        |        0                                                                
+  2 | b        |        0                                                                
+(2 rows)                  
+
+                        </code></pre>
+                    </section>
+                    <section>
+                        <pre><code data-trim>
+insert into upsert_table (some_key) values ('a');                                        
+psql:upsert2.sql:3: ERROR:  duplicate key value violates unique constraint "upsert_table_
+some_key_key"                                                                            
+DETAIL:  Key (some_key)=(a) already exists.   
+                        </pre></code>
+                    </section>
+                    <section>
+                        <pre><code data-trim>
+insert into upsert_table (some_key) values ('a')                                         
+    ON CONFLICT DO NOTHING;                                                              
+INSERT 0 0                                                                               
+select * from upsert_table;                                                              
+ id | some_key | some_val                                                                
+----+----------+----------                                                               
+  1 | a        |        0                                                                
+  2 | b        |        0                                                                
+(2 rows)                           
+                        </pre></code>
+                    </section>
+                    <section>
+                        <pre><code data-trim>
+insert into upsert_table (some_key) values ('a')                                         
+    ON CONFLICT DO update SET some_val = some_val + 1;                                   
+psql:upsert4.sql:4: ERROR:  ON CONFLICT DO UPDATE requires inference specification or con
+straint name                                                                             
+LINE 2:     ON CONFLICT DO update SET some_val = some_val + 1;                           
+            ^                                                                            
+HINT:  For example, ON CONFLICT (<column>).      
+                        </pre></code>
+                    </section>
+                    <section>
+                        <pre><code data-trim>
+insert into upsert_table (some_key) values ('a')                                         
+    ON CONFLICT (some_key) DO update SET some_val = some_val + 1;                        
+psql:upsert5.sql:4: ERROR:  column reference "some_val" is ambiguous                     
+LINE 2: ...  ON CONFLICT (some_key) DO update SET some_val = some_val +... 
+                        </pre></code>
+                    </section>
+                    <section>
+                        <pre><code data-trim>
+INSERT INTO upsert_table AS u (some_key) VALUES ('a')                                    
+    ON CONFLICT (some_key) DO UPDATE SET some_val = u.some_val + 1;                      
+INSERT 0 1                                                                               
+SELECT * FROM upsert_table;                                                              
+ id | some_key | some_val                                                                
+----+----------+----------                                                               
+  2 | b        |        0                                                                
+  1 | a        |        1                                                                
+(2 rows)                          
+                        </pre></code>
+                    </section>
+                    <section>
+                        <pre><code data-trim>
+INSERT INTO upsert_table AS u (some_key, some_val) VALUES ('b', 10)                      
+    ON CONFLICT ON CONSTRAINT upsert_table_some_key_key DO UPDATE SET some_val = excluded.some_val;                                                                            INSERT 0 1                                                                               
+SELECT * FROM upsert_table;                                                              
+ id | some_key | some_val                                                                
+----+----------+----------                                                               
+  1 | a        |        1                                                                
+  2 | b        |       10                                                                
+(2 rows)                 
+                        </pre></code>
+                    </section>
                 </section>
 
                 <section data-background="css/theme/omniti_bg_logo.png">
-                    <h2>Row Level Security (RLS)</h2>
-                    <ul>
-                        <li>Per-row access policies</li>
-                        <li>In addition to existing schema, table, column privileges</li>
-                        <li>Superusers and object owners bypass RLS. Unless...</li>
-                        <li>New GUC - row_security (ON, OFF, FORCE)</li>
-                        <li>pg_dump sets row_securty to OFF (--enable-row-security)</li>
-                        <li>Multiple policies per table (Results are OR'ed)</li>
-                        <li>BYPASSRLS/NOBYPASSRLS - new role property to allow individual roles to bypass RLS</li>
-                        <li>Row level security shows up in the \d results</li>
-                        <li>"Row Level Security" by Stephen Frost tomorrow @ 4pm in DMS 1140</li> 
+                    <section>
+                        <h2>Row Level Security (RLS)</h2>
+                        <ul>
+                            <li>Per-row access policies</li>
+                            <li>In addition to existing schema, table, column privileges</li>
+                            <li>Superusers and object owners bypass RLS. Unless...</li>
+                            <li>New GUC - row_security (ON, OFF, FORCE)</li>
+                            <li>pg_dump sets row_securty to OFF (--enable-row-security)</li>
+                            <li>Multiple policies per table (Results are OR'ed)</li>
+                            <li>BYPASSRLS/NOBYPASSRLS - new role property to allow individual roles to bypass RLS</li>
+                            <li>Row level security shows up in the \d results</li>
+                            <li>"Row Level Security" by Stephen Frost tomorrow @ 4pm in DMS 1140</li> 
+                        </section>
+                    <section>
+                        <pre><code data-trim>
+
+                        </pre></code>
+                    </section>
                 </section>
 
                 <section data-background="css/theme/omniti_bg_logo.png">
