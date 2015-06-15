@@ -222,6 +222,137 @@ SELECT * FROM upsert_table;
                         </section>
                     <section>
                         <pre><code data-trim>
+CREATE TABLE clients (
+    id serial primary key,
+    account_name text not null unique,
+    account_manager text not null
+);
+CREATE TABLE
+ 
+CREATE USER peter;
+CREATE ROLE
+ 
+CREATE USER joanna;
+CREATE ROLE
+ 
+CREATE USER bill;
+CREATE ROLE
+ 
+GRANT ALL ON TABLE clients TO peter, joanna, bill;
+GRANT
+ 
+GRANT ALL ON SEQUENCE clients_id_seq TO peter, joanna, bill;
+GRANT
+ 
+INSERT INTO clients (account_name, account_manager)
+    VALUES ('initrode', 'peter'), ('initech', 'bill'), ('chotchkie''s', 'joanna');
+INSERT 0 3
+                        </pre></code>
+                    </section>
+                    <section>
+                        <pre><code data-trim>
+\c - peter
+You are now connected to database "keith" as user "peter".
+SELECT * FROM clients;
+ id | account_name | account_manager 
+----+--------------+-----------------
+  1 | initrode     | peter
+  2 | initech      | bill
+  3 | chotchkie's  | joanna
+(3 rows)
+                        </pre></code>
+                    </section>
+                    <section>
+                        <pre><code data-trim>
+\c - keith
+You are now connected to database "keith" as user "keith".
+CREATE POLICY just_own_clients ON clients
+    FOR all
+    TO public
+    USING ( account_manager = current_user );
+CREATE POLICY
+ 
+ALTER TABLE clients ENABLE ROW LEVEL SECURITY;
+ALTER TABLE
+                        </pre></code>
+                    </section>
+                    <section>
+                        <pre><code data-trim>
+\c - peter
+You are now connected to database "keith" as user "peter".
+SELECT * FROM clients;
+ id | account_name | account_manager 
+----+--------------+-----------------
+  1 | initrode     | peter
+(1 row)
+                        </pre></code>
+                    </section>
+                    <section>
+                        <pre><code data-trim>
+\c - joanna
+You are now connected to database "keith" as user "joanna".
+SELECT * FROM clients;
+ id | account_name | account_manager 
+----+--------------+-----------------
+  3 | chotchkie's  | joanna
+(1 row)
+                        </pre></code>
+                    </section>
+                    <section>
+                        <pre><code data-trim>
+\c - peter
+You are now connected to database "keith" as user "peter".
+INSERT INTO clients (account_name, account_manager) VALUES ('hack', 'bill');
+psql:row_level6.sql:5: ERROR:  new row violates row level security policy for "clients"
+INSERT INTO clients (account_name, account_manager) VALUES ('hack', 'peter');
+INSERT 0 1
+                        </pre></code>
+                    </section>
+                    <section>
+                        <pre><code data-trim>
+\c - keith
+You are now connected to database "keith" as user "keith".
+DROP POLICY just_own_clients ON clients;
+DROP POLICY
+CREATE POLICY just_own_clients ON clients
+    FOR all
+    TO public
+    USING ( account_manager = current_user )
+    WITH CHECK ( account_manager IN ( 'bill', current_user ) );
+CREATE POLICY
+\d clients
+                              Table "public.clients"
+     Column      |  Type   |                      Modifiers                       
+-----------------+---------+------------------------------------------------------
+ id              | integer | not null default nextval('clients_id_seq'::regclass)
+ account_name    | text    | not null
+ account_manager | text    | not null
+Indexes:
+    "clients_pkey" PRIMARY KEY, btree (id)
+    "clients_account_name_key" UNIQUE CONSTRAINT, btree (account_name)
+Policies:
+    POLICY "just_own_clients" FOR ALL
+      USING (account_manager = ("current_user"())::text)
+      WITH CHECK (account_manager = ANY (ARRAY['bill'::text, ("current_user"())::text]))
+                        </pre></code>
+                    </section>
+                    <section>
+                        <pre><code data-trim>
+\c - peter
+You are now connected to database "keith" as user "peter".
+SELECT * FROM clients;
+ id | account_name | account_manager 
+----+--------------+-----------------
+  1 | initrode     | peter
+  5 | hack         | peter
+(2 rows)
+
+INSERT INTO clients (account_name, account_manager) VALUES ('hack2', 'bill');
+INSERT 0 1
+                        </pre></code>
+                    </section>
+                    <section>
+                        <pre><code data-trim>
 
                         </pre></code>
                     </section>
