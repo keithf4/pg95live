@@ -58,9 +58,6 @@
                 <section data-background="css/theme/omniti_bg_logo.png">
                     TODO
                     <br>
-Add the development schedule with when the commit fests are. See magnus's slides
-<br>- Ask for help reviewing things in commitfest
-<br>- Statistics
 <br>- Go back and put script output as subslides to current subject (ex put upsert*.sql output in slides below upsert slide)
 
 
@@ -134,7 +131,7 @@ Add the development schedule with when the commit fests are. See magnus's slides
                         <li>New GUC - row_security (ON, OFF, FORCE)</li>
                         <li>pg_dump sets row_securty to OFF (--enable-row-security)</li>
                         <li>Multiple policies per table (Results are OR'ed)</li>
-                        <li>BYPASSRLS - new role property to allow individual roles to bypass RLS</li>
+                        <li>BYPASSRLS/NOBYPASSRLS - new role property to allow individual roles to bypass RLS</li>
                         <li>Row level security shows up in the \d results</li>
                         <li>"Row Level Security" by Stephen Frost tomorrow @ 4pm in DMS 1140</li> 
                 </section>
@@ -290,8 +287,9 @@ WHERE ...
                  <section data-background="css/theme/omniti_bg_logo.png">
                     <h2>Sorting Speed Improvement</h2>
                     <ul>
-                        <li>Sorting used by CREATE INDEX, CLUSTER &amp; query plans much faster (3x - 10x) for text and numeric data</li>
+                        <li>Sorting used by CREATE INDEX, CLUSTER &amp; query plans much faster (3-4x) for text and numeric data</li>
                         <li>Abbreviated Keys</li>
+                        <li>Exhaustive explanation on <a href="http://pgeoghegan.blogspot.com/2015/01/abbreviated-keys-exploiting-locality-to.html" target="_blank">Peter Geoghegan's Blog</a>
                     </ul>
                 </section>
                  <section data-background="css/theme/omniti_bg_logo.png">
@@ -305,7 +303,7 @@ WHERE ...
                 <section data-background="css/theme/omniti_bg_logo.png">
                     <h2>Parallel vacuumdb</h2>
                     <ul>
-                        <li>Allows vacuumdb to open several server connections to vacuum or analyze several tables simultaneously.<li>
+                        <li>Allows vacuumdb to open several server connections to vacuum or analyze several tables simultaneously.</li>
                         <li>--jobs=# (-j#)</li>
                         <li>Starts with largest tables first</li>
                 </section>
@@ -382,7 +380,12 @@ WHERE ...
                  <section data-background="css/theme/omniti_bg_logo.png">
                     <h2>How can you help?</h2>
                     <ul>
-                        <li>Download 9.5 now! - <a href="https://github.com/postgres/postgres" target="_blank">https://github.com/postgres/postgres</a></li>
+                        <li>CommitFest</li>
+                        <ul>
+                            <li>2015-06 is Open Now!</li>
+                            <li>https://commitfest.postgresql.org</li>
+                        </ul>
+                        <li>Download, Compile, Install &amp; Test 9.5 now! - <a href="https://github.com/postgres/postgres" target="_blank">https://github.com/postgres/postgres</a></li>
                 </section>
 
                 <section data-background="css/theme/omniti_bg_logo.png">
