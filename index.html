@@ -143,67 +143,65 @@ SELECT * FROM upsert_table;
                     </section>
                     <section>
                         <pre><code data-trim>
-insert into upsert_table (some_key) values ('a');                                        
-psql:upsert2.sql:3: ERROR:  duplicate key value violates unique constraint "upsert_table_
-some_key_key"                                                                            
-DETAIL:  Key (some_key)=(a) already exists.   
+insert into upsert_table (some_key) values ('a');
+psql:upsert2.sql:3: ERROR:  duplicate key value violates unique constraint "upsert_table_ some_key_key"
+DETAIL:  Key (some_key)=(a) already exists.
                         </pre></code>
                     </section>
                     <section>
                         <pre><code data-trim>
-insert into upsert_table (some_key) values ('a')                                         
-    ON CONFLICT DO NOTHING;                                                              
-INSERT 0 0                                                                               
-select * from upsert_table;                                                              
- id | some_key | some_val                                                                
-----+----------+----------                                                               
-  1 | a        |        0                                                                
-  2 | b        |        0                                                                
+insert into upsert_table (some_key) values ('a')
+    ON CONFLICT DO NOTHING;
+INSERT 0 0 
+select * from upsert_table;
+ id | some_key | some_val 
+----+----------+---------- 
+  1 | a        |        0
+  2 | b        |        0
 (2 rows)                           
                         </pre></code>
                     </section>
                     <section>
                         <pre><code data-trim>
-insert into upsert_table (some_key) values ('a')                                         
-    ON CONFLICT DO update SET some_val = some_val + 1;                                   
-psql:upsert4.sql:4: ERROR:  ON CONFLICT DO UPDATE requires inference specification or con
-straint name                                                                             
-LINE 2:     ON CONFLICT DO update SET some_val = some_val + 1;                           
-            ^                                                                            
-HINT:  For example, ON CONFLICT (<column>).      
+insert into upsert_table (some_key) values ('a')
+    ON CONFLICT DO update SET some_val = some_val + 1;
+psql:upsert4.sql:4: ERROR:  ON CONFLICT DO UPDATE requires inference specification or constraint name
+LINE 2:     ON CONFLICT DO update SET some_val = some_val + 1;
+            ^ 
+HINT:  For example, ON CONFLICT (<column>).
                         </pre></code>
                     </section>
                     <section>
                         <pre><code data-trim>
-insert into upsert_table (some_key) values ('a')                                         
-    ON CONFLICT (some_key) DO update SET some_val = some_val + 1;                        
-psql:upsert5.sql:4: ERROR:  column reference "some_val" is ambiguous                     
-LINE 2: ...  ON CONFLICT (some_key) DO update SET some_val = some_val +... 
+insert into upsert_table (some_key) values ('a')
+    ON CONFLICT (some_key) DO update SET some_val = some_val + 1;
+psql:upsert5.sql:4: ERROR:  column reference "some_val" is ambiguous
+LINE 2: ...  ON CONFLICT (some_key) DO update SET some_val = some_val +...
                         </pre></code>
                     </section>
                     <section>
                         <pre><code data-trim>
-INSERT INTO upsert_table AS u (some_key) VALUES ('a')                                    
-    ON CONFLICT (some_key) DO UPDATE SET some_val = u.some_val + 1;                      
-INSERT 0 1                                                                               
-SELECT * FROM upsert_table;                                                              
- id | some_key | some_val                                                                
-----+----------+----------                                                               
-  2 | b        |        0                                                                
-  1 | a        |        1                                                                
-(2 rows)                          
+INSERT INTO upsert_table AS u (some_key) VALUES ('a')
+    ON CONFLICT (some_key) DO UPDATE SET some_val = u.some_val + 1;
+INSERT 0 1
+SELECT * FROM upsert_table;
+ id | some_key | some_val
+----+----------+----------
+  2 | b        |        0
+  1 | a        |        1
+(2 rows)
                         </pre></code>
                     </section>
                     <section>
                         <pre><code data-trim>
-INSERT INTO upsert_table AS u (some_key, some_val) VALUES ('b', 10)                      
-    ON CONFLICT ON CONSTRAINT upsert_table_some_key_key DO UPDATE SET some_val = excluded.some_val;                                                                            INSERT 0 1                                                                               
-SELECT * FROM upsert_table;                                                              
- id | some_key | some_val                                                                
-----+----------+----------                                                               
-  1 | a        |        1                                                                
-  2 | b        |       10                                                                
-(2 rows)                 
+INSERT INTO upsert_table AS u (some_key, some_val) VALUES ('b', 10)
+    ON CONFLICT ON CONSTRAINT upsert_table_some_key_key DO UPDATE SET some_val = excluded.some_val;                                                                            INSERT 0 1
+SELECT * FROM upsert_table;
+ id | some_key | some_val
+----+----------+----------
+  1 | a        |        1
+  2 | b        |       10
+(2 rows)
                         </pre></code>
                     </section>
                 </section>
