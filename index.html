@@ -168,7 +168,7 @@ insert into upsert_table (some_key) values ('a')
 psql:upsert4.sql:4: ERROR:  ON CONFLICT DO UPDATE requires inference specification or constraint name
 LINE 2:     ON CONFLICT DO update SET some_val = some_val + 1;
             ^ 
-HINT:  For example, ON CONFLICT (<column>).
+HINT:  For example, ON CONFLICT (&lt;column&gt;).
                         </pre></code>
                     </section>
                     <section>
