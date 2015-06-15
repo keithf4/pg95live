@@ -161,6 +161,7 @@ Add the development schedule with when the commit fests are. See magnus's slides
                             <li>Stop master (if it's still around)</li>
                             <li>Touch recovery trigger file on slave to make master</li>
                             <li>Rebuild old master from scratch as new slave</li>
+                            <li>Pray your master stays up during long rebuild...</li>
                                 <ul>
                                     <li>Rsync helped, but still not ideal for huge databases</li>
                                 </ul>
@@ -257,16 +258,7 @@ WHERE ...
                         </ul>
                     </ul>
                 </section>
-
-                 <section data-background="css/theme/omniti_bg_logo.png">
-                    <h2>Sorting Speed Improvement</h2>
-                    <ul>
-                        <li>Sorting used by CREATE INDEX, CLUSTER &amp; query plans much faster for text and numeric data</li>
-                        <li>3x - 10x faster</li>
-                        <li>Abbreviated Keys</li>
-                    </ul>
-                </section>
-                
+               
                 <section data-background="css/theme/omniti_bg_logo.png">
                     <h2>BRIN Indexes</h2>
                     <ul>
@@ -295,7 +287,14 @@ WHERE ...
                     </ul>
                 </section>
 
-                <section data-background="css/theme/omniti_bg_logo.png">
+                 <section data-background="css/theme/omniti_bg_logo.png">
+                    <h2>Sorting Speed Improvement</h2>
+                    <ul>
+                        <li>Sorting used by CREATE INDEX, CLUSTER &amp; query plans much faster (3x - 10x) for text and numeric data</li>
+                        <li>Abbreviated Keys</li>
+                    </ul>
+                </section>
+                 <section data-background="css/theme/omniti_bg_logo.png">
                     <h2>Toggle UNLOGGED</h2>
                     <ul>
                         <li>ALTER TABLE ... SET LOGGED / UNLOGGED</li>
@@ -305,57 +304,82 @@ WHERE ...
 
                 <section data-background="css/theme/omniti_bg_logo.png">
                     <h2>Parallel vacuumdb</h2>
-                    http://www.depesz.com/2015/01/26/waiting-for-9-5-vacuumdb-enable-parallel-mode/
+                    <ul>
+                        <li>Allows vacuumdb to open several server connections to vacuum or analyze several tables simultaneously.<li>
+                        <li>--jobs=# (-j#)</li>
+                        <li>Starts with largest tables first</li>
                 </section>
 
                 <section data-background="css/theme/omniti_bg_logo.png">
-                    <h2>pg_xlogdump --stats</h2>
-                    --stats argument. Figure out what's using up the space in the WAL log files to see what's causing the most activiy (DML, inserts, vacuum, etc) 
+                    <h2>pg_xlogdump</h2>
+                    <ul>
+                        <li>New --stats argument prints summary statstics for the contents of WAL files</li>
+                        <li>--stats=record : generate per record instead of per resource manager</li>
+                        <li>Figure out what's using up the space in the WAL log files to see what's causing the most activiy (DML, inserts, vacuum, etc) </li>
                 </section>
 
                 <section data-background="css/theme/omniti_bg_logo.png">
                     <h2>WAL compression</h2>
-                    Pay CPU cost for saving IO cost
-                    Only compresses full page images so still gzip them!
+                    <ul>
+                        <li>Smaller WAL files, faster replication</li>
+                        <li>Pay CPU cost for saving IO &amp; disk space</li> 
+                        <li>Only compresses full page images so still useful to gzip them</li>
                 </section>
 
                 <section data-background="css/theme/omniti_bg_logo.png">
-                    <h2>ALTER SYSTEM RESET</h2>
+                    <h2>ALTER SYSTEM RESET ... | ALL  </h2>
+                    <ul>
+                        <li>Reset to either postgresql.conf value or default if not explicitly set</li>
+                        <li>ALTER SYSTEM RESET work_mem;</li>
+                    </ul>
                 </section>
 
-                <section data-background="css/theme/omniti_bg_logo.png">
-                    <h2>TABLESAMPLE</h2>
-                    http://www.depesz.com/2015/05/23/waiting-for-9-5-tablesample-sql-standard-and-extensible/
-                </section>
-
-                <section data-background="css/theme/omniti_bg_logo.png">
-                    <h2>pending_restart</h2>
-                    http://www.depesz.com/2015/05/21/waiting-for-9-5-add-pg_settings-pending_restart-column/
-                </section>
-
-                <section data-background="css/theme/omniti_bg_logo.png">
+               <section data-background="css/theme/omniti_bg_logo.png">
                     <h2>recovery_target_action</h2>
-                    What happens when slave catches up with WALs when coming out of recovery
+                    <ul>
+                        <li>Specify action the server should take once the recovery target is reached</li>
+                        <li>pause, promote, shutdown</li>
+                        <li>Pause is useful to check that system is at the desired recovery location. If not, change target settings then...</li>
+                        <li>Paused state can be resumed by using pg_xlog_replay_resume(), which then causes recovery to end</li>
+                    </ul>
                 </section>
 
                 <section data-background="css/theme/omniti_bg_logo.png">
                     <h2>Cluster System Process Name</h2>
-                    cluster_name in system process name. Useful in multi instance deployments
+                    <ul>
+                        <li>New postgresql.conf setting: cluster_name</li>
+                        <li>Name shows up in process list</li>
+                        <li>Useful when running multiple clusters on the same system</li>
+                    </ul>
                 </section>
 
                 <section data-background="css/theme/omniti_bg_logo.png">
                     <h2>Binary Dump Restore Feedback</h2>
-                    Lets you know if you try and restore an -Fc dump with psql that you should instead use pg_restore
+                    <ul>
+                        <li>psql lets you know if you try and restore an -Fc dump when you should instead use pg_restore</li>
+                    </ul>
                 </section>
 
                 <section data-background="css/theme/omniti_bg_logo.png">
                     <h2>Parallel Sequential Scan (possibly)</h2>
-                    First step towards actual parallelized queries?
-                    http://rhaas.blogspot.com/2015/03/parallel-sequential-scan-for-postgresql.html
-                        - Robert has a dedicated talk for this. Go there!
+                    <ul>
+                        <li>First step towards actual parallelized queries?</li>
+                        <li>Robert Haas &amp; Amit Kapila have a dedicated talk for this tomorrow @ 1pm in DMS 1120</li>
+                    </ul>
                 </section>
 
+<!--                
                 <section data-background="css/theme/omniti_bg_logo.png">
+                    <h2>TABLESAMPLE</h2>
+                    http://www.depesz.com/2015/05/23/waiting-for-9-5-tablesample-sql-standard-and-extensible/
+                </section>
+-->
+<!--                <section data-background="css/theme/omniti_bg_logo.png">
+                    <h2>pending_restart</h2>
+                    http://www.depesz.com/2015/05/21/waiting-for-9-5-add-pg_settings-pending_restart-column/
+                </section>
+-->
+                 <section data-background="css/theme/omniti_bg_logo.png">
                     <h2>How can you help?</h2>
                     <ul>
                         <li>Download 9.5 now! - <a href="https://github.com/postgres/postgres" target="_blank">https://github.com/postgres/postgres</a></li>

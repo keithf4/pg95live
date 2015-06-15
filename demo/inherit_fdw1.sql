@@ -1,5 +1,8 @@
 \set ECHO ALL
 
+DROP DATABASE IF EXISTS foreign_db;
+CREATE DATABASE foreign_db;
+
 \c foreign_db
 
 DROP TABLE IF EXISTS log_entry_y2014;

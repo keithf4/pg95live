@@ -1,0 +1,9 @@
+stop_my_pg 95
+
+start_my_pg 94
+
+/opt/pgsql94/bin/pg_dump -Fc -f 95demo_dump.pgr keith
+
+/opt/pgsql94/bin/psql -X -f 95demo_dump.pgr demo
+
+/opt/pgsql95/bin/psql -X -f 95demo_dump.pgr demo
