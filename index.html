@@ -55,15 +55,7 @@
 
 			<!-- Any section element inside of this container is displayed as a slide -->
 			<div class="slides">
-                <section data-background="css/theme/omniti_bg_logo.png">
-                    TODO
-                    <br>
-<br>- Go back and put script output as subslides to current subject (ex put upsert*.sql output in slides below upsert slide)
-
-
-                </section>
-
-
+            
                 <section data-background="css/theme/omniti_bg_logo.png">
                     <section>
                         <h1>9.5 Coming To You Live</h1>
@@ -83,7 +75,7 @@
                     </section>
                     <section id="cmdline">
                         <!-- Uncomment this iframe to activate shellinabox connection -->
-                        <!-- <iframe src="https://localhost:4200" height="600" width="1200"></iframe> -->
+                        <iframe src="https://localhost:4200" height="600" width="1200"></iframe>
                     </section>
                 </section>
                 
@@ -105,6 +97,14 @@
                     <ul>
                         <li>Author of several third party PG Tools:<br />
                         <a href="https://github.com/keithf4/pg_partman" target="_blank">pg_partman</a>, <a href="https://github.com/omniti-labs/pg_extractor" target="_blank">pg_extractor</a>, <a href="https://github.com/omniti-labs/mimeo" target="_blank">mimeo</a>, <a href="https://github.com/omniti-labs/pg_jobmon" target="_blank">pg_jobmon</a></li>
+                    </ul>
+                </section>
+
+                <section data-background="css/theme/omniti_bg_logo.png">
+                    <h2>When Is It Coming?</h2>
+                    <ul>
+                        <li>Alpha expected later this month (June)</li>
+                        <li>Release scheduled for mid October 2015</li>
                     </ul>
                 </section>
    
@@ -351,11 +351,6 @@ INSERT INTO clients (account_name, account_manager) VALUES ('hack2', 'bill');
 INSERT 0 1
                         </pre></code>
                     </section>
-                    <section>
-                        <pre><code data-trim>
-
-                        </pre></code>
-                    </section>
                 </section>
 
                 <section data-background="css/theme/omniti_bg_logo.png">
@@ -404,29 +399,197 @@ INSERT 0 1
                 </section>
 
                 <section data-background="css/theme/omniti_bg_logo.png">
-                    <h2>Foreign Table Inheritance</h2>
-                    <ul>
-                        <li>Foreign tables can how be inheritance children or parents</li>
-                        <li>More options for partitioning &amp; sharding</li>
-                    </ul>
+                    <section>
+                        <h2>Foreign Table Inheritance</h2>
+                        <ul>
+                            <li>Foreign tables can how be inheritance children or parents</li>
+                            <li>More options for partitioning &amp; sharding</li>
+                        </ul>
+                    </section>
+                    <section>
+                        <pre><code data-trim>
+CREATE DATABASE foreign_db;
+\c foreign_db
+You are now connected to database "foreign_db" as user "keith".
+CREATE TABLE log_entry_y2014(log_time timestamp,
+       entry text,
+       check (date(log_time) &gt;= '2014-01-01' AND
+              date(log_time) &lt; '2015-01-01'));
+CREATE TABLE log_entry_y2015(log_time timestamp,
+       entry text,
+       check (date(log_time) &gt;= '2015-01-01' AND
+              date(log_time) &lt; '2016-01-01'));
+\c keith
+You are now connected to database "keith" as user "keith".
+                        </pre></code>
+                    </section>
+                    <section>
+                        <pre><code data-trim>
+CREATE EXTENSION postgres_fdw;
+CREATE SERVER myfdw FOREIGN DATA WRAPPER postgres_fdw
+    OPTIONS (host 'localhost', dbname 'foreign_db');
+CREATE USER MAPPING FOR PUBLIC SERVER myfdw OPTIONS (password '');
+                        </pre></code>
+                    </section>
+                    <section>
+                        <pre><code data-trim>
+CREATE TABLE log_entries(log_time timestamp, entry text);
+CREATE FOREIGN TABLE log_entry_y2014_f (log_time timestamp, entry text)
+   INHERITS (log_entries) SERVER myfdw OPTIONS (table_name 'log_entry_y2014');
+psql:inherit_fdw3.sql:10: NOTICE:  merging column "log_time" with inherited definition
+psql:inherit_fdw3.sql:10: NOTICE:  merging column "entry" with inherited definition
+CREATE FOREIGN TABLE
+CREATE FOREIGN TABLE log_entry_y2015_f (log_time timestamp, entry text)
+   INHERITS (log_entries) SERVER myfdw OPTIONS (table_name 'log_entry_y2015');
+psql:inherit_fdw3.sql:13: NOTICE:  merging column "log_time" with inherited definition
+psql:inherit_fdw3.sql:13: NOTICE:  merging column "entry" with inherited definition
+CREATE FOREIGN TABLE
+\d+ log_entries
+                                 Table "public.log_entries"
+  Column  |            Type             | Modifiers | Storage  | Stats target | Description 
+----------+-----------------------------+-----------+----------+--------------+-------------
+ log_time | timestamp without time zone |           | plain    |              | 
+ entry    | text                        |           | extended |              | 
+Child tables: log_entry_y2014_f,
+              log_entry_y2015_f
+
+\d+ log_entry_y2014_f
+                                 Foreign table "public.log_entry_y2014_f"
+  Column  |            Type             | Modifiers | FDW Options | Storage  | Stats target | Description 
+----------+-----------------------------+-----------+-------------+----------+--------------+-------------
+ log_time | timestamp without time zone |           |             | plain    |              | 
+ entry    | text                        |           |             | extended |              | 
+Server: myfdw
+FDW Options: (table_name 'log_entry_y2014')
+Inherits: log_entries
+                        </pre></code>
+                    </section>
                 </section>
 
                 <section data-background="css/theme/omniti_bg_logo.png">
-                    <h2>Import Foreign Schema</h2>
-                    <ul>
-                        <li>Create all tables in a defined FDW's schema as local foreign tables with a single command</li>
-                        <li>"Transacting with foreign servers - Two's company, three is ..." by Ashutosh Bapat tomorrow @ 2pm in DMS 1160</li>
-                    </ul>
+                    <section>
+                        <h2>Import Foreign Schema</h2>
+                        <ul>
+                            <li>Create all tables in a defined FDW's schema as local foreign tables with a single command</li>
+                            <li>"Transacting with foreign servers - Two's company, three is ..." by Ashutosh Bapat tomorrow @ 2pm in DMS 1160</li>
+                        </ul>
+                    </section>
+                    <section>
+                        <pre><code data-trim>
+CREATE SCHEMA fdw_schema;
+IMPORT FOREIGN SCHEMA public FROM SERVER myfdw INTO fdw_schema;
+\dE *.*
+                   List of relations
+   Schema   |       Name        |     Type      | Owner 
+------------+-------------------+---------------+-------
+ fdw_schema | log_entry_y2014   | foreign table | keith
+ fdw_schema | log_entry_y2015   | foreign table | keith
+ public     | log_entry_y2014_f | foreign table | keith
+ public     | log_entry_y2015_f | foreign table | keith
+(4 rows)
+                        </pre></code>
+                    </section>
                 </section>
 
                 <section data-background="css/theme/omniti_bg_logo.png">
-                    <h2>Grouping Sets</h2>
-                    <ul>
-                        <li>Aggregate data by different GROUP BY clauses at once</li>
-                        <li>Previously achieved by conjoined UNION ALL statements</li>
-                        <li>ROLLUP &amp; CUBE</li>
-                        <li>Depesz does great job of explaining further <a href="http://www.depesz.com/2015/05/24/waiting-for-9-5-support-grouping-sets-cube-and-rollup/" target="_blank">on his blog</a></li>
-                    </ul>
+                    <section>
+                        <h2>Grouping Sets</h2>
+                        <ul>
+                            <li>Aggregate data by different GROUP BY clauses at once</li>
+                            <li>Previously achieved by conjoined UNION ALL statements</li>
+                            <li>ROLLUP &amp; CUBE</li>
+                            <li>Depesz does great job of explaining further <a href="http://www.depesz.com/2015/05/24/waiting-for-9-5-support-grouping-sets-cube-and-rollup/" target="_blank">on his blog</a></li>
+                        </ul>
+                    </section>
+                    <section>
+                        <pre><code data-trim>
+CREATE TABLE db_details (
+    appnumber int4,
+    day date,
+    inserts int8,
+    updates int8,
+    deletes int8,
+    transactions int8,
+    PRIMARY KEY (appnumber, day)
+);
+CREATE TABLE
+CREATE SEQUENCE x INCREMENT BY 7;
+CREATE SEQUENCE
+INSERT INTO db_details
+SELECT
+    i,
+    j,
+    nextval('x'),
+    nextval('x'),
+    nextval('x'),
+    nextval('x')
+FROM
+    generate_series(1,3) i,
+    generate_series(now() - '2 days'::interval, now(), '1 day'::interval) j;
+INSERT 0 9
+DROP SEQUENCE x;
+DROP SEQUENCE
+SELECT * FROM db_details;
+ appnumber |    day     | inserts | updates | deletes | transactions 
+-----------+------------+---------+---------+---------+--------------
+         1 | 2015-06-14 |       1 |       8 |      15 |           22
+         1 | 2015-06-15 |      29 |      36 |      43 |           50
+         1 | 2015-06-16 |      57 |      64 |      71 |           78
+         2 | 2015-06-14 |      85 |      92 |      99 |          106
+         2 | 2015-06-15 |     113 |     120 |     127 |          134
+         2 | 2015-06-16 |     141 |     148 |     155 |          162
+         3 | 2015-06-14 |     169 |     176 |     183 |          190
+         3 | 2015-06-15 |     197 |     204 |     211 |          218
+         3 | 2015-06-16 |     225 |     232 |     239 |          246
+(9 rows)
+                        </pre></code>
+                    </section>
+                    <section>
+                        <pre><code data-trim>
+SELECT appnumber, sum(inserts), sum(updates), sum(deletes), sum(transactions)
+FROM db_details
+GROUP BY appnumber;
+ appnumber | sum | sum | sum | sum 
+-----------+-----+-----+-----+-----
+         1 |  87 | 108 | 129 | 150
+         3 | 591 | 612 | 633 | 654
+         2 | 339 | 360 | 381 | 402
+(3 rows)
+
+SELECT day, sum(inserts), sum(updates), sum(deletes), sum(transactions)
+FROM db_details
+GROUP BY day;
+    day     | sum | sum | sum | sum 
+------------+-----+-----+-----+-----
+ 2015-06-15 | 339 | 360 | 381 | 402
+ 2015-06-14 | 255 | 276 | 297 | 318
+ 2015-06-16 | 423 | 444 | 465 | 486
+(3 rows)
+                        </pre></code>
+                    </section>
+                    <section>
+                        <pre><code data-trim>
+SELECT
+    appnumber,
+    day,
+    sum(inserts),
+    sum(updates),
+    sum(deletes),
+    sum(transactions)
+FROM
+    db_details
+GROUP BY GROUPING SETS ( appnumber, day );
+ appnumber |    day     | sum | sum | sum | sum 
+-----------+------------+-----+-----+-----+-----
+         1 |            |  87 | 108 | 129 | 150
+         2 |            | 339 | 360 | 381 | 402
+         3 |            | 591 | 612 | 633 | 654
+           | 2015-06-14 | 255 | 276 | 297 | 318
+           | 2015-06-15 | 339 | 360 | 381 | 402
+           | 2015-06-16 | 423 | 444 | 465 | 486
+(6 rows)
+                        </pre></code>
+                    </section>
                 </section>
 
                 <section data-background="css/theme/omniti_bg_logo.png">
@@ -443,11 +606,64 @@ WHERE ...
                 </section>
 
                 <section data-background="css/theme/omniti_bg_logo.png">
-                    <h2>Numeric generate_series()</h2>
-                    <ul>
-                        <li>generate_series() could do int &amp; time already</li>
-                        <li>Can now start &amp; end higher than int</li>
-                    </ul>
+                    <section>
+                        <h2>Numeric generate_series()</h2>
+                        <ul>
+                            <li>generate_series() could do int &amp; time already</li>
+                            <li>Can now start &amp; end higher than int</li>
+                        </ul>
+                    </section>
+                    <section>
+                        <pre><code data-trim>
+SELECT generate_series(1,10);
+ generate_series 
+-----------------
+               1
+               2
+               3
+               4
+               5
+               6
+               7
+               8
+               9
+              10
+(10 rows)
+                        </pre></code>
+                    </section>
+                    <section>
+                        <pre><code data-trim>
+SELECT generate_series('2014-01-01 00:00:00'::timestamp, now(), '65 days 7 hours 13 minutes 2 seconds'::interval);
+    generate_series     
+------------------------
+ 2014-01-01 00:00:00-05
+ 2014-03-07 07:13:02-05
+ 2014-05-11 14:26:04-04
+ 2014-07-15 21:39:06-04
+ 2014-09-19 04:52:08-04
+ 2014-11-23 12:05:10-05
+ 2015-01-27 19:18:12-05
+ 2015-04-03 02:31:14-04
+ 2015-06-07 09:44:16-04
+(9 rows)
+                        </pre></code>
+                    </section>
+                    <section>
+                        <pre><code data-trim>
+SELECT generate_series(10.1, 11.6, .2);
+ generate_series 
+-----------------
+            10.1
+            10.3
+            10.5
+            10.7
+            10.9
+            11.1
+            11.3
+            11.5
+(8 rows)
+                        </pre></code>
+                    </section>
                 </section>
 
                 <section data-background="css/theme/omniti_bg_logo.png">
@@ -459,22 +675,90 @@ WHERE ...
                 </section>
 
                 <section data-background="css/theme/omniti_bg_logo.png">
-                    <h2>SKIP LOCKED</h2>
-                    <ul>
-                        <li>Skip locked rows when using SELECT ... NOWAIT
-                    </ul>
+                    <section>
+                        <h2>SKIP LOCKED</h2>
+                        <ul>
+                            <li>Skip locked rows when using SELECT ... NOWAIT
+                        </ul>
+                    </section>
+                    <section>
+                        <pre><code data-trim>
+CREATE TABLE jobs ( id serial primary key, priority int4 NOT NULL, payload text);
+CREATE TABLE
+INSERT INTO jobs (priority, payload) SELECT random() * 100, 'payload #' || i FROM generate_series(1,100) i;
+INSERT 0 100
+SELECT * FROM jobs LIMIT 10;
+ id | priority |   payload   
+----+----------+-------------
+  1 |        6 | payload #1
+  2 |       85 | payload #2
+  3 |        7 | payload #3
+  4 |       61 | payload #4
+  5 |       92 | payload #5
+  6 |       47 | payload #6
+  7 |       39 | payload #7
+  8 |       51 | payload #8
+  9 |       46 | payload #9
+ 10 |       82 | payload #10
+(10 rows)
+                        </pre></code>
+                    </section>
+                    <section>
+                        <pre><code data-trim>
+BEGIN;
+BEGIN
+SELECT * FROM jobs ORDER BY priority DESC, id ASC LIMIT 1 FOR UPDATE;
+ id | priority |   payload   
+----+----------+-------------
+ 61 |      100 | payload #61
+(1 row)
+                        </pre></code>
+                    </section>
+                    <section>
+                        <pre><code data-trim>
+BEGIN;
+BEGIN
+SELECT * FROM jobs ORDER BY priority DESC, id ASC LIMIT 1 FOR UPDATE NOWAIT;
+psql:skip_locked3.sql:5: ERROR:  could not obtain lock on row in relation "jobs"
+                        </pre></code>
+                    </section>
+                    <section>
+                        <pre><code data-trim>
+ROLLBACK;
+ROLLBACK
+BEGIN;
+BEGIN
+SELECT * FROM jobs ORDER BY priority DESC, id ASC LIMIT 1 FOR UPDATE SKIP LOCKED;
+ id | priority |   payload   
+----+----------+-------------
+ 90 |       98 | payload #90
+(1 row)
+                        </pre></code>
+                    </section>
+                    <section>
+                        <pre><code data-trim>
+BEGIN;
+BEGIN
+SELECT * FROM jobs ORDER BY priority DESC, id ASC LIMIT 1 FOR UPDATE SKIP LOCKED;
+ id | priority |   payload   
+----+----------+-------------
+ 59 |       95 | payload #59
+(1 row)
+                        </pre></code>
+                    </section>
                 </section>
 
                 <section data-background="css/theme/omniti_bg_logo.png">
                     <h2>Reduced Lock Levels</h2>
                     <ul>
-                        <li>Reduced lock levels (to ShareRowExclusive) for</li>
+                        <li>Reduced lock levels for</li>
                         <ul>
                             <li>CREATE TRIGGER (not DROP or ALTER)</li>
                             <li>ALTER TABLE ENABLE TRIGGER</li>
                             <li>ALTER TABLE DISABLE TRIGGER</li>
                             <li>ALTER TABLE ... ADD CONSTRAINT FOREIGN KEY</li>
                         </ul>
+                        <li>ShareRowExclusive: Allows Reads, Blocks Writes</li>
                     </ul>
                 </section>
                
@@ -531,11 +815,87 @@ WHERE ...
                 </section>
 
                 <section data-background="css/theme/omniti_bg_logo.png">
-                    <h2>pg_xlogdump</h2>
-                    <ul>
-                        <li>New --stats argument prints summary statstics for the contents of WAL files</li>
-                        <li>--stats=record : generate per record instead of per resource manager</li>
-                        <li>Figure out what's using up the space in the WAL log files to see what's causing the most activiy (DML, inserts, vacuum, etc) </li>
+                    <section>
+                        <h2>pg_xlogdump</h2>
+                        <ul>
+                            <li>New --stats argument prints summary statstics for the contents of WAL files</li>
+                            <li>--stats=record : generate per record instead of per resource manager</li>
+                            <li>Figure out what's using up the space in the WAL log files to see what's causing the most activiy (DML, inserts, vacuum, etc) </li>
+                        </ul>
+                    </section>
+                    <section>
+                        <pre><code data-trim>
+$ pg_xlogdump --stats /opt/pgdata/95/pg_xlog/000000010000000000000001
+Type                                           N      (%)          Record size      (%)             FPI size      (%)        Combined size      (%)
+----                                           -      ---          -----------      ---             --------      ---        -------------      ---
+XLOG                                          50 (  0.12)                 4212 (  0.37)                    0 (  0.00)                 4212 (  0.08)
+Transaction                                  700 (  1.66)                22484 (  1.98)                    0 (  0.00)                22484 (  0.44)
+Storage                                       53 (  0.13)                 2120 (  0.19)                    0 (  0.00)                 2120 (  0.04)
+CLOG                                           1 (  0.00)                   28 (  0.00)                    0 (  0.00)                   28 (  0.00)
+Database                                       5 (  0.01)                  200 (  0.02)                    0 (  0.00)                  200 (  0.00)
+Tablespace                                     0 (  0.00)                    0 (  0.00)                    0 (  0.00)                    0 (  0.00)
+MultiXact                                      0 (  0.00)                    0 (  0.00)                    0 (  0.00)                    0 (  0.00)
+RelMap                                         1 (  0.00)                  548 (  0.05)                    0 (  0.00)                  548 (  0.01)
+Standby                                        0 (  0.00)                    0 (  0.00)                    0 (  0.00)                    0 (  0.00)
+Heap2                                        699 (  1.65)                20360 (  1.79)              2066796 ( 52.05)              2087156 ( 40.88)
+Heap                                       15522 ( 36.71)               424348 ( 37.40)               586652 ( 14.77)              1011000 ( 19.80)
+Btree                                      25235 ( 59.68)               657158 ( 57.92)              1317360 ( 33.18)              1974518 ( 38.68)
+Hash                                           0 (  0.00)                    0 (  0.00)                    0 (  0.00)                    0 (  0.00)
+Gin                                            0 (  0.00)                    0 (  0.00)                    0 (  0.00)                    0 (  0.00)
+Gist                                           0 (  0.00)                    0 (  0.00)                    0 (  0.00)                    0 (  0.00)
+Sequence                                      17 (  0.04)                 3094 (  0.27)                    0 (  0.00)                 3094 (  0.06)
+SPGist                                         0 (  0.00)                    0 (  0.00)                    0 (  0.00)                    0 (  0.00)
+BRIN                                           0 (  0.00)                    0 (  0.00)                    0 (  0.00)                    0 (  0.00)
+CommitTs                                       0 (  0.00)                    0 (  0.00)                    0 (  0.00)                    0 (  0.00)
+ReplicationOrigin                              0 (  0.00)                    0 (  0.00)                    0 (  0.00)                    0 (  0.00)
+                                        --------                      --------                      --------                      --------
+Total                                      42283                       1134552 [22.22%]              3970808 [77.78%]              5105360 [100%]
+pg_xlogdump: FATAL:  error in WAL record at 0/1802848: invalid record length at 0/1802870
+                        </pre></code>
+                    </section>
+                    <section>
+                        <pre><code data-trim>
+$ pg_xlogdump --stats=record /opt/pgdata/95/pg_xlog/000000010000000000000001
+Type                                           N      (%)          Record size      (%)             FPI size      (%)        Combined size      (%)
+----                                           -      ---          -----------      ---             --------      ---        -------------      ---
+XLOG/CHECKPOINT_SHUTDOWN                      17 (  0.04)                 1768 (  0.16)                    0 (  0.00)                 1768 (  0.03)
+XLOG/CHECKPOINT_ONLINE                        21 (  0.05)                 2184 (  0.19)                    0 (  0.00)                 2184 (  0.04)
+XLOG/NEXTOID                                  13 (  0.03)                  364 (  0.03)                    0 (  0.00)                  364 (  0.01)
+Transaction/COMMIT                           689 (  1.63)                22048 (  1.94)                    0 (  0.00)                22048 (  0.43)
+Transaction/ABORT                              4 (  0.01)                  128 (  0.01)                    0 (  0.00)                  128 (  0.00)
+Transaction/COMMIT                             7 (  0.02)                  308 (  0.03)                    0 (  0.00)                  308 (  0.01)
+Storage/CREATE                                53 (  0.13)                 2120 (  0.19)                    0 (  0.00)                 2120 (  0.04)
+CLOG/ZEROPAGE                                  1 (  0.00)                   28 (  0.00)                    0 (  0.00)                   28 (  0.00)
+Database/CREATE                                5 (  0.01)                  200 (  0.02)                    0 (  0.00)                  200 (  0.00)
+RelMap/UPDATE                                  1 (  0.00)                  548 (  0.05)                    0 (  0.00)                  548 (  0.01)
+Heap2/CLEAN                                   77 (  0.18)                 2464 (  0.22)               205476 (  5.17)               207940 (  4.07)
+Heap2/FREEZE_PAGE                            239 (  0.57)                 7170 (  0.63)              1500872 ( 37.80)              1508042 ( 29.54)
+Heap2/VISIBLE                                375 (  0.89)                10500 (  0.93)               360448 (  9.08)               370948 (  7.27)
+Heap2/MULTI_INSERT                             1 (  0.00)                   30 (  0.00)                    0 (  0.00)                   30 (  0.00)
+Heap2/MULTI_INSERT+INIT                        7 (  0.02)                  196 (  0.02)                    0 (  0.00)                  196 (  0.00)
+Heap/INSERT                                14521 ( 34.34)               392067 ( 34.55)               400688 ( 10.09)               792755 ( 15.53)
+Heap/DELETE                                  139 (  0.33)                 4448 (  0.39)                    0 (  0.00)                 4448 (  0.09)
+Heap/UPDATE                                   68 (  0.16)                 2584 (  0.23)                81232 (  2.05)                83816 (  1.64)
+Heap/HOT_UPDATE                              357 (  0.84)                13566 (  1.20)                50332 (  1.27)                63898 (  1.25)
+Heap/LOCK                                      6 (  0.01)                  186 (  0.02)                 5380 (  0.14)                 5566 (  0.11)
+Heap/INPLACE                                 195 (  0.46)                 5070 (  0.45)                40976 (  1.03)                46046 (  0.90)
+Heap/INSERT+INIT                             231 (  0.55)                 6237 (  0.55)                    0 (  0.00)                 6237 (  0.12)
+Heap/UPDATE+INIT                               5 (  0.01)                  190 (  0.02)                 8044 (  0.20)                 8234 (  0.16)
+Btree/INSERT_LEAF                          24933 ( 58.97)               648258 ( 57.13)              1109412 ( 27.94)              1757670 ( 34.43)
+Btree/INSERT_UPPER                           112 (  0.26)                 2912 (  0.26)                12960 (  0.33)                15872 (  0.31)
+Btree/SPLIT_L                                 46 (  0.11)                 1472 (  0.13)                30156 (  0.76)                31628 (  0.62)
+Btree/SPLIT_R                                 66 (  0.16)                 2112 (  0.19)                36300 (  0.91)                38412 (  0.75)
+Btree/SPLIT_L_ROOT                             3 (  0.01)                   96 (  0.01)                    0 (  0.00)                   96 (  0.00)
+Btree/SPLIT_R_ROOT                             3 (  0.01)                   96 (  0.01)                    0 (  0.00)                   96 (  0.00)
+Btree/DELETE                                   1 (  0.00)                   44 (  0.00)                    0 (  0.00)                   44 (  0.00)
+Btree/NEWROOT                                 45 (  0.11)                 1440 (  0.13)                    0 (  0.00)                 1440 (  0.03)
+Btree/VACUUM                                  26 (  0.06)                  728 (  0.06)               128532 (  3.24)               129260 (  2.53)
+Sequence/LOG                                  17 (  0.04)                 3094 (  0.27)                    0 (  0.00)                 3094 (  0.06)
+                                        --------                      --------                      --------                      --------
+Total                                      42284                       1134656 [22.22%]              3970808 [77.78%]              5105464 [100%]
+pg_xlogdump: FATAL:  error in WAL record at 0/1802870: invalid record length at 0/18028E0
+                        </pre></code>
+                    </section>
                 </section>
 
                 <section data-background="css/theme/omniti_bg_logo.png">
@@ -565,19 +925,55 @@ WHERE ...
                 </section>
 
                 <section data-background="css/theme/omniti_bg_logo.png">
-                    <h2>Cluster System Process Name</h2>
-                    <ul>
-                        <li>New postgresql.conf setting: cluster_name</li>
-                        <li>Name shows up in process list</li>
-                        <li>Useful when running multiple clusters on the same system</li>
-                    </ul>
+                    <section>
+                        <h2>Cluster System Process Name</h2>
+                        <ul>
+                            <li>New postgresql.conf setting: cluster_name</li>
+                            <li>Name shows up in process list</li>
+                            <li>Useful when running multiple clusters on the same system</li>
+                        </ul>
+                    </section>
+                    <section>
+                        <pre><code data-trim>
+$ ps aux | grep postgres
+keith     4468  0.0  0.3 170564 13260 pts/8    S    15:05   0:00 /opt/pgsql95dev/bin/postgres -D /opt/pgdata/95
+keith     4470  0.0  0.0 170664  3920 ?        Ss   15:05   0:00 postgres: checkpointer process                
+keith     4471  0.0  0.0 170564  1872 ?        Ss   15:05   0:00 postgres: writer process                      
+keith     4472  0.0  0.1 170564  5004 ?        Ss   15:05   0:00 postgres: wal writer process                  
+keith     4473  0.0  0.0 170984  1940 ?        Ss   15:05   0:00 postgres: autovacuum launcher process         
+keith     4474  0.0  0.0  25704  1116 ?        Ss   15:05   0:00 postgres: stats collector process             
+keith     5158  0.0  0.0  11740   932 pts/8    S+   16:27   0:00 grep --colour=auto postgres
+                        </pre></code>
+                    </section>
+                    <section>
+                        <pre><code data-trim>
+$ ps aux | grep postgres
+keith     5180  0.3  0.3 170564 13248 pts/8    S    16:28   0:00 /opt/pgsql95dev/bin/postgres -D /opt/pgdata/95
+keith     5182  0.0  0.0 170564   844 ?        Ss   16:28   0:00 postgres: pg95live: checkpointer process      
+keith     5183  0.0  0.0 170564  1084 ?        Ss   16:28   0:00 postgres: pg95live: writer process            
+keith     5184  0.0  0.0 170564   844 ?        Ss   16:28   0:00 postgres: pg95live: wal writer process        
+keith     5185  0.0  0.0 170984  1876 ?        Ss   16:28   0:00 postgres: pg95live: autovacuum launcher process  
+keith     5186  0.0  0.0  25704  1124 ?        Ss   16:28   0:00 postgres: pg95live: stats collector process   
+keith     5188  0.0  0.0  11740   936 pts/8    S+   16:28   0:00 grep --colour=auto postgres
+                        </pre></code>
+                    </section>
                 </section>
 
                 <section data-background="css/theme/omniti_bg_logo.png">
-                    <h2>Binary Dump Restore Feedback</h2>
-                    <ul>
-                        <li>psql lets you know if you try and restore an -Fc dump when you should instead use pg_restore</li>
-                    </ul>
+                    <section>
+                        <h2>Binary Dump Restore Feedback</h2>
+                        <ul>
+                            <li>psql lets you know if you try and restore an -Fc dump when you should instead use pg_restore</li>
+                        </ul>
+                    </section>
+                    <section>
+                        <pre><code data-trim>
+$ /opt/pgsql95/bin/psql -X -f 95demo_dump.pgr demo
+The input is a PostgreSQL custom-format dump.
+Use the pg_restore command-line client to restore this dump to a database.
+                        </pre></code>
+                    </section>
+
                 </section>
 
                 <section data-background="css/theme/omniti_bg_logo.png">
@@ -605,24 +1001,30 @@ WHERE ...
                         <li>CommitFest</li>
                         <ul>
                             <li>2015-06 is Open Now!</li>
-                            <li>https://commitfest.postgresql.org</li>
+                            <li><a href="https://commitfest.postgresql.org" target="_blank">https://commitfest.postgresql.org</a></li>
+                            <li>9.6 CommitFests</li>
+                            <ul>
+                                <li>July 1 '15, Sept 1, Nov 1, Jan 1 '16, Mar 1</li>
+                                <li>Feature Freeze Apr 2016</li>
+                            </ul>
                         </ul>
-                        <li>Download, Compile, Install &amp; Test 9.5 now! - <a href="https://github.com/postgres/postgres" target="_blank">https://github.com/postgres/postgres</a></li>
+                        <li>Download, Compile, Install &amp; Test Now! - <a href="https://github.com/postgres/postgres" target="_blank">https://github.com/postgres/postgres</a></li>
                 </section>
 
                 <section data-background="css/theme/omniti_bg_logo.png">
-                    <h1>Thanks to</h1>
-                    <ul>
-                        <li>Magnus Hagander - For doing this talk in NYC before me already so I could steal it. </li>
-                        <li>Hubert "Depesz" Lubaczewski - http://www.depesz.com - "Waiting For 9.5 ..." series.</li>
-                        <li>Michael Paquier - http://michael.otacoo.com/ - "9.5 feature highlight ..." series
-                        <li>Reveal.js - https://github.com/hakimel/reveal.js - For the awesome software this presentation was created in</li>
-                    </ul>
+                    <h2>Thanks to</h2>
+                    <div id="li30">
+                        <ul style="font-size:25px">
+                            <li>Planet PostgreSQL - <a href="http://planet.postgresql.org" target="_blank">http://planet.postgresql.org</a></li>
+                            <li>Magnus Hagander - For doing this talk in NYC before me already so I could steal it. </li>
+                            <li>Hubert "Depesz" Lubaczewski - <a href="http://www.depesz.com" target="_blank">http://www.depesz.com</a> - "Waiting For 9.5 ..." series.</li>
+                            <li>Michael Paquier - <a href="http://michael.otacoo.com/" target="_blank">http://michael.otacoo.com</a>- "9.5 feature highlight ..." series
+                            <li>Reveal.js - <a href="https://github.com/hakimel/reveal.js" target="_blank">https://github.com/hakimel/reveal.js</a> - For this presentation software</li>
+                        </ul>
+                    </div>
 
                 </section>
 
-
-				
 
 			</div>
 

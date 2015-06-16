@@ -1,3 +1,4 @@
+\set ECHO ALL
 ROLLBACK;
 BEGIN;
 
