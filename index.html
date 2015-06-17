@@ -365,7 +365,7 @@ INSERT 0 1
                         <li>Moving average of WAL segments (pg_xlogs) based on current activity</li>
                         <li>Checkpoints are auto-tuned to happen in between this size of WAL segments existing</li>
                         <li>Will only use up to max_wal_size if actually needed</li>
-                        <li>If you set them the same, it gives you the same behavior as before</li>
+                        <li>If you set them the same, it disables the auto-tuning feature and essentially gives old behavior, but with a max size in place</li>
                 </section>
 
                 <section data-background="css/theme/omniti_bg_logo.png">
@@ -403,7 +403,7 @@ INSERT 0 1
                     <section>
                         <h2>Foreign Table Inheritance</h2>
                         <ul>
-                            <li>Foreign tables can how be inheritance children or parents</li>
+                            <li>Foreign tables can now be inheritance children or parents</li>
                             <li>More options for partitioning &amp; sharding</li>
                         </ul>
                     </section>
